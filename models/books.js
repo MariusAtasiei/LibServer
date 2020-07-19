@@ -15,7 +15,7 @@ const bookSchema = new mongo.Schema(
     pages: { type: Number, required: true },
     disponibility: { type: String },
     sale: { type: Number },
-    image: { path: String, mimetype: String },
+    image: { data: Buffer, mimetype: String },
     searchKeys: { type: String },
   },
   { timestamps: true }

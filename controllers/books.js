@@ -1,5 +1,4 @@
 const Book = require("../models/books")
-const fs = require("fs")
 
 exports.createBook = async (req, res) => {
   const { title } = req.body
@@ -7,17 +6,14 @@ exports.createBook = async (req, res) => {
   const { price } = req.body
   const { image } = req.files
 
-  const { mimetype } = image
-
-  const path = `${__dirname}/../uploads/books/${id}.${mimetype.split("/")[1]}`
-  image.mv(path)
+  const { mimetype, data } = image
 
   const { author, publisher, category, year } = req.body
   const searchKeys = `${title.toLowerCase()} ${author.toLowerCase()} ${publisher.toLowerCase()} ${category.toLowerCase()} ${year.toLowerCase()}`
 
   const newBook = new Book({
     ...req.body,
-    image: { path, mimetype },
+    image: { data, mimetype },
     disponibility: "new",
     fullPrice: price,
     id,
@@ -25,6 +21,7 @@ exports.createBook = async (req, res) => {
   })
 
   try {
+    console.log(newBook)
     await newBook.save()
 
     return res.json(newBook)
@@ -84,8 +81,10 @@ exports.deleteBooks = async (req, res) => {
 
 exports.deleteBook = async (req, res) => {
   const { id } = req.params
+
   try {
     await Book.findByIdAndDelete(id)
+
     return res.json("DONE")
   } catch (err) {
     return res.status(400).json(err.message)
@@ -106,7 +105,7 @@ exports.getBook = async (req, res) => {
 
 exports.editBook = async (req, res) => {
   const { _id } = req.body
-  req.body._id = undefined
+
   const updateBook = new Book(req.body)
 
   if (req.files) {
@@ -114,10 +113,7 @@ exports.editBook = async (req, res) => {
 
     const { mimetype } = image
 
-    const path = `${__dirname}/../uploads/books/${id}.${mimetype.split("/")[1]}`
-    image.mv(path)
-
-    updateBook.image = { path, mimetype }
+    updateBook.image = { content: image, mimetype }
   }
 
   try {
@@ -131,8 +127,9 @@ exports.editBook = async (req, res) => {
 exports.bookPhoto = async (req, res) => {
   const { id } = req.params
   const { image } = await Book.findById(id).select("image")
+
   res.set("Content-type", image.mimetype)
-  return res.send(fs.readFileSync(image.path))
+  return res.send(image.data)
 }
 
 exports.getFilters = async (req, res) => {
