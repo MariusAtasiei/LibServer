@@ -34,6 +34,7 @@ mongo.connect(process.env.MONGODB_URI, {
 mongo.connection.once("open", () => console.log("MongoDB connected "))
 
 app.get("/", (req, res) => res.json("Hello World"))
+app.get("/database", (req, res) => res.json(process.env.MONGODB_URI))
 app.use("/book", booksRouter)
 app.use("/auth", authRouter)
 app.use("/wishlist", wishlistRouter)
