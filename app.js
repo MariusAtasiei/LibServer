@@ -33,6 +33,7 @@ mongo.connect(process.env.MONGODB_URI, {
 
 mongo.connection.once("open", () => console.log("MongoDB connected "))
 
+app.get("/", (req, res) => res.json("Hello World"))
 app.use("/book", booksRouter)
 app.use("/auth", authRouter)
 app.use("/wishlist", wishlistRouter)
