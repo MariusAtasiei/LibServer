@@ -39,9 +39,7 @@ exports.signup = async (req, res) => {
 
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
-        throw new Error(
-          "We had an error with the mail server. Please try again later"
-        )
+        throw new Error(error)
       }
     })
 
