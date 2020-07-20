@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
 
     const { _id, username } = await User.findOne({ email })
 
-    const confirmLink = `http://localhost:3000/confirmation/${_id.toString()}&${newUser.token(
+    const confirmLink = `https://test-mats-app.herokuapp.com/confirmation/${_id.toString()}&${newUser.token(
       _id
     )}`
 
