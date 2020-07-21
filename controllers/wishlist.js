@@ -55,6 +55,8 @@ exports.addToWishlist = async (req, res) => {
     let wishlist = await Wishlist.findOne({ name, username })
 
     if (wishlist) {
+      if (wishlist.books.includes(book))
+        throw new Error("Book already in wishlist")
       wishlist.books.push(book)
       wishlist.numOfBooks += 1
     } else {
@@ -66,9 +68,12 @@ exports.addToWishlist = async (req, res) => {
     wishlist.save()
 
     return res.json({ message: "Book successfully added" })
-  } catch (err) {
-    console.log(err)
-    return res.json({ error: "Book couldn't be added" })
+  } catch ({ message }) {
+    const error = message.includes("already")
+      ? message
+      : "Book could not be saved"
+
+    return res.json({ error })
   }
 }
 

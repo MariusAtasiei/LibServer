@@ -1,4 +1,5 @@
 const Book = require("../models/books")
+const Order = require("../models/order")
 
 exports.createBook = async (req, res) => {
   const { title } = req.body
@@ -21,7 +22,6 @@ exports.createBook = async (req, res) => {
   })
 
   try {
-    console.log(newBook)
     await newBook.save()
 
     return res.json(newBook)
@@ -144,5 +144,47 @@ exports.getFilters = async (req, res) => {
     return res.json(object)
   } catch (err) {
     return res.status(400).json(err.message)
+  }
+}
+
+exports.checkout = async (req, res, next) => {
+  const { body } = req
+  const _id = Object.keys(body)
+
+  const cart = await Book.find({ _id }).select("amount")
+
+  const check = cart.every(({ amount, _id }) => amount >= body[_id])
+
+  return res.json(check)
+}
+
+exports.order = async (req, res) => {
+  const { body } = req
+  const { cart } = body
+
+  const ids = Object.keys(cart)
+
+  try {
+    const books = await Book.find({ _id: ids })
+
+    books.forEach(async (book) => {
+      try {
+        book.amount -= cart[book._id]
+        if (book.amount < 0) throw new Error("Out of stock.")
+        await book.save()
+      } catch ({ message }) {
+        return res.json({ error: message })
+      }
+    })
+
+    const newOrder = new Order(body)
+
+    const { _id } = await newOrder.save()
+
+    return res.json({
+      message: `Ordered succefully. The id of the order is ${_id}`,
+    })
+  } catch ({ message }) {
+    return res.json({ error: message })
   }
 }
