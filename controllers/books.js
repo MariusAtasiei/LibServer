@@ -94,7 +94,7 @@ exports.deleteBook = async (req, res) => {
 exports.getBook = async (req, res) => {
   const { id } = req.params
   try {
-    const book = await Book.findOne({ id }).select(
+    const book = await Book.findById(id).select(
       "-createdAt -updatedAt -__v -searchKeys"
     )
     return res.json(book)
