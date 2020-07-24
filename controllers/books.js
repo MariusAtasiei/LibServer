@@ -1,5 +1,6 @@
 const Book = require("../models/books")
 const Order = require("../models/order")
+const _ = require("lodash")
 
 exports.createBook = async (req, res) => {
   const { title } = req.body
@@ -104,20 +105,26 @@ exports.getBook = async (req, res) => {
 }
 
 exports.editBook = async (req, res) => {
-  const { _id } = req.body
+  const { body } = req
+  const { _id } = body
 
-  const updateBook = new Book(req.body)
+  let updateBook = await Book.findById(_id)
 
   if (req.files) {
     const { image } = req.files
 
     const { mimetype } = image
 
-    updateBook.image = { content: image, mimetype }
+    body.image = { content: image, mimetype }
+  } else {
+    body.image = updateBook.image
   }
 
+  updateBook = _.extend(updateBook, body)
+
   try {
-    await Book.findByIdAndUpdate(_id, updateBook)
+    await updateBook.save()
+
     return res.json({ message: "Book updated successfully" })
   } catch (err) {
     res.status(400).json({ error: err.message })
